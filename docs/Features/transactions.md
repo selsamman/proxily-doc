@@ -1,6 +1,6 @@
 ---
 title: Transactions
-sidebar_position: 5
+sidebar_position: 4
 ---
 ### Use Cases
 Forking the state is not a common feature of state management libraries.  To understand the benefits, here are a few common use cases:

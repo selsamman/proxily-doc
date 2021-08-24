@@ -1,6 +1,6 @@
 ---
-sidebar_position: 3
-title: Transactions
+sidebar_position: 4
+title: Transaction API
 ---
 A transaction is a context for state.  There is a default transaction that is automatically created.  Additional transactions may be created to create a copy of the state so that state may be mutated independently and then committed back to the default transaction. There are several ways to create a transaction:
 

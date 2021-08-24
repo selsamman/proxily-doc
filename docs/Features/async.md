@@ -1,6 +1,6 @@
 ---
 title: Asynchronous
-sidebar_position: 7
+sidebar_position: 3
 ---
 ## Promises
 Since actions are just normal member functions they can be asynchronous:

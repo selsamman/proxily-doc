@@ -4,7 +4,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
   title: 'Proxily',
-  tagline: 'Complete State Management for React Apps',
+  tagline: 'Mutable React State Management',
   url: 'https://selsamman.github.io',
   baseUrl: '/proxily/',
   onBrokenLinks: 'throw',
@@ -14,9 +14,9 @@ module.exports = {
   projectName: 'proxily', // Usually your repo name.
   themeConfig: {
     navbar: {
-      title: '',
+      title: 'Proxily',
       logo: {
-        alt: 'Proxily',
+        alt: 'Proxily Docs',
         src: 'img/proxily.svg',
       },
       items: [
@@ -24,9 +24,18 @@ module.exports = {
           type: 'doc',
           docId: 'Introduction/intro',
           position: 'left',
-          label: 'Documentation',
+          label: 'Docs',
         },
-       ],
+        {
+          href: 'https://github.com/selsamman/proxily',
+          label: 'GitHub',
+        },
+        {
+          href: 'https://github.com/selsamman/proxily',
+          label: 'Discussion',
+        },
+
+      ],
     },
     footer: {
       style: 'dark',
@@ -52,12 +61,12 @@ module.exports = {
           title: 'More',
           items: [
             {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
               label: 'GitHub',
               href: 'https://github.com/selsamman/proxily',
+            },
+            {
+              label: 'Discussion',
+              href: 'https://github.com/selsamman/proxily/discussions',
             },
           ],
         },

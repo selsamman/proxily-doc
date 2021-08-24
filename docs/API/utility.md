@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
-title: Tool Integration
+sidebar_position: 6
+title: Utility API
 ---
 These are features of proxily that are important but less often used
 ## nonObservable

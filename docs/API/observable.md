@@ -33,6 +33,19 @@ Tracks usage of any properties of objects made observable through **makeObservab
 
 **useObservables** must only be used in a React functional component and must conform to the rules of hooks in terms of always being called in the same order relative to other hooks that may be used by the component.  
 
+## useObservableProp ##
+```
+useObservableProp<S>(value: S) : [S, (value: S) => void]
+```
+Returns an array where the 1st element is a property value and the second a function used to set the property value.  The property is the last one referenced.  By passing a reference to a property in the argument this established the property in the argument as the last reference.
+
+Used like this
+```javascript
+  const [value, setValue] = useObservableProp(counter.value)
+```
+**useObservables** must be called before calling **useObservableProp**.
+
+***setValue*** will be considered an action for tooling such as redux-devtools.
 
 ## observe ##
 ```typescript

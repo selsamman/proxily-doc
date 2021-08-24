@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
-title: Serialize & Persist
+title: Serialize/Persist API
 ---
 ## Serialize
 ```typescript
 serialize(rootObj : any) : string
 ```
-Serializes any observable object returning a string that can be deserialized.  While the string can be parsed with JSON.parse it will parse into an internal format that has types and id's and so really is only useful for processing by deserialize.  See the [restrictions](Features/serialization.md) on the data that can be processed in this fashion.
+Serializes any observable object returning a string that can be deserialized.  While the string can be parsed with JSON.parse it will parse into an internal format that has types and id's and so really is only useful for processing by deserialize.  See the [restrictions](../Features/persistence#restrictions) on the data that can be processed in this fashion.
 ## Deserialize
 ```typescript
 type ClassHandlers = {[index: string] : (obj: any)=>any};

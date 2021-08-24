@@ -1,6 +1,6 @@
 ---
-title: Asynchronous
-sidebar_position: 7
+title: Sagas API
+sidebar_position: 3
 ---
 ## scheduleTask
 
