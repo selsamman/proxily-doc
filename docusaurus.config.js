@@ -6,7 +6,7 @@ module.exports = {
   title: 'Proxily',
   tagline: 'Mutable React State Management',
   url: 'https://selsamman.github.io',
-  baseUrl: '/proxily/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
