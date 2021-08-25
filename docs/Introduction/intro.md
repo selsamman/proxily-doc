@@ -15,7 +15,7 @@ Proxily is a library for managing state in a non-prescriptive way. It re-renders
 * Rich support for Typescript, classes and objects including automatic function binding
 ## Installation
 ```javascript
-yarn install proxily
+yarn add proxily
 ```
 or
 ```
