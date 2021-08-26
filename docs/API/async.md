@@ -31,6 +31,21 @@ Scheduling tasks uses redux-sagas under the covers.  It consists of:
 * The dispatching saga takes from a channel rather than taking an action pattern.
 * The dispatching saga uses Channels and EventEmitters to feed the take helper
 
+You can also provide a custom taker for more complex interactions:
+```typescript
+const takeLeadingCustom = (patternOrChannel:any, saga:any, ...args:any) => 
+    fork(function*() {
+        while (true) {
+            const action : any = yield take(patternOrChannel);
+            yield call(saga, ...args.concat(action));
+            console.log("dispatched");
+    }
+})
+...
+scheduleTask(this.task, {interval: 1000}, takeLeadingCustom);
+
+```
+
 ## cancelTask ##
 You can cancel a task if you don't want it to run for the duration of your application.  You must pass the same take helper since this is used to locate the task:
 ```typescript

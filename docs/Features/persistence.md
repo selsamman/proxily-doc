@@ -1,31 +1,44 @@
 ---
-title: Persistence & Serialization
+title: Persist & Serialize
 sidebar_position: 2
 ---
 ### Persist
-Proxily will integrate with any storage object that supports getItem and setItem.  Specifically this includes localStorage and sessionStorage.  To integrate with storage use **persist** to read from storage, merge with an initial state, set up a proxy and observe any changes to the proxy and write back to storage
-```typescript
-const stateProxy = persist(state, {classes: [Class1, Class2]});
-```
-The first parameter to persist is the initial state which is any structure supported by Proxily including plane objects or class based hierarchies.  The second parameter is the configuration which may include these properties:
-* **storageEngine** - Any storage engine that supports getItem and setItem. Defaults to localStorage.
-* **classes** - An array of classes used in the structure so they can be reconsititued properly
-* **migrate** - A function which is passed the persisted state and the initial state and should return the new state.  It might, for example, enhance the persisted state to bring it up-to-date with the current application requirements and then merge it using the default merge routine exported from Proxily
-
-The default migration logic will merge initial and persistent states giving preference to the persistent state.  It will merge multiple levels up to but not including properties of built-in objects or Arrays.
+Proxily will integrate with localStorage, sessionStorage or any storage library that getItem and setItem .  This includes localStorage, sessionStorage and React Native's AsyncStorage.  Use **persist** to integrate your state with storage: 
 ```typescript
 import {migrate, persist} from 'proxily';
-const classes = [TodoList, TodoListItem];
-const persistedObservableState = persist(state, {classes , migrate: myMigrate});
+
+const persistedObservableState = persist(state, 
+    {classes: [TodoList, TodoListItem]});
+```
+**persist** makes the returned state observable, so you don't need to call makeObservable.  When using classes you need to provide a list of them so that your state can be properly reconstituted. 
+
+Persist has a number of [options](../API/serial_persist#persist) such as which storage engine to use and how you want to merge your state.  You can provide a function to merge in the saved state with your initial state providing for upgrades to the state shape.
+
+```typescript
+const persistedObservableState = persist(state,
+    {classes: [TodoList, TodoListItem], migrate: myMigrate});
+    
 function myMigrate (persist, initial) {
     delete persist.description; // unused property
     return migrate(persist, initial);
 }
 ```
-Note:  persist will also make the state returned observable so there is no need to additionally call makeObservable.
+The benefit of using classes rather than POJOs for your state is that you don't need to provide migration logic simply because you add a new property to your state.  The initial value of that property will be set when the class is instantiated.
 
+An easy way to get the list of classes is to re-export them in an index file in your store directory:
+
+```typescript
+export {ToDoList} from "./ToDoList";
+export {ToDoListItem} from "./ToDoListItem";
+export {TodoListStyle} from "./TodoListStyle";
+```
+And then get the values from that index file
+```typescript
+const classes = Object.values(require('./store'));
+```
+**There are [restrictions](#restrictions) on what can be in your state in order to persist or serialize it**
 ### Serialization
-Serialization lets you take snapshots of your state.  It is also used internally by **persist** when you want to save and restore your state to local or session storage.  Proxily supports the serialization of complex objects including classes.
+Serialization lets you take snapshots of your state.  It is also used internally by **persist** when you want to save and restore your state to local or session storage.  Proxily supports the serialization of complex objects, including cyclic references and classes.
 
 Proxily **serialize** converts the object graph to JSON, discovering any objects discovered in the process and noting their constructor in the JSON.  When you call **deserialize**, Proxily does the opposite and re-instantiates the object graph.  It can cover cases where the same object instance is referenced in multiple places and cyclic patterns. Here is an example structure that includes multiple references to the same object
 ```typescript
