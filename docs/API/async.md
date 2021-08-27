@@ -4,7 +4,7 @@ sidebar_position: 3
 ---
 ## scheduleTask
 
-Schedule a task using redux-sagas and it's channel interface
+Schedule a task using Redux-saga and it's channel interface
 ```typescript
 scheduleTask<T> (task : (parameter: T)=>void, parameter? : T, taker?: any, ...takerArgs : any) : void 
 ```
@@ -12,9 +12,9 @@ scheduleTask<T> (task : (parameter: T)=>void, parameter? : T, taker?: any, ...ta
 |-|-|
 |task| a generator function |
 |parameter| An object with parameters your generator may consume |
-|taker| A scheduling generator usually from redux-sagas - see below |
+|taker| A scheduling generator usually from redux-saga - see below |
 
-Thee standard takers can be imported from "@redux-saga/core/effects"
+The standard takers can be imported from "@redux-saga/core/effects"
 
 * **takeEvery** - Allow concurrent execution of the task as it scheduled
 * **takeLeading** - Ignore requests to schedule the task while first instance of the task is in process
@@ -22,7 +22,7 @@ Thee standard takers can be imported from "@redux-saga/core/effects"
 * **debounce** - Wait x milliseconds before running ignoring any others scheduled in that interval
   **scheduleTask** just uses redux-saga functions to schedule a task
 
-Scheduling tasks uses redux-sagas under the covers.  It consists of:
+Scheduling tasks uses Redux-saga under the covers.  It consists of:
 * Calling runSaga on a dispatching saga, provided by Proxily for your task
 * The dispatching saga then yields on the take helper passing it your generator task.
 * The dispatching sage then yields waiting to be cancelled.
@@ -53,7 +53,7 @@ You can cancel a task if you don't want it to run for the duration of your appli
 ```
 The parameters must be the same first two parameters you passed to **scheduleTask**.
 
-###Important Notes on Usage:
+## Redux Dependency
 Proxily does not have redux-saga as a dependency.  Therefore, you must:
 * Add redux-saga to your project
 
@@ -66,4 +66,5 @@ Proxily does not have redux-saga as a dependency.  Therefore, you must:
 * With react-native you may also need to install events
 
   ```yarn install events```
-``
+
+This will also add Redux itself to your build though it won't be used.

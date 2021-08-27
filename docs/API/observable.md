@@ -7,7 +7,13 @@ title: Observable API
 makeObservable<T>(targetIn: T, transaction? : Transaction) : T
 ```
 
-**makeObservable** Makes a state object able to detect changes react to them using either [**useObservables**](#useobservable) or [**observe**](#observe).  It also enables all other proxily functionality that applies to observable objects such as memoization, function binding, reporting top level calls as actions to redux-devtools.  
+**makeObservable** returns a proxy for a state object that will:
+* Track references to properties when used [**useObservables**](#useobservables).
+* React to property changes.  Components that call [**useObservables**](#useobservables) are re-rendered when properties those components reference are mutated.  
+* Performs tracking and reacting outside of React components using [**observe**](#observe)
+* Binds methods to the object, so they can be used without an object reference
+* Handles the memoization of any methods annotated as being memoized.
+* Extends this behaviour to referenced object by replacing them proxies.
 
 | Item  | Description |
 |-|-|
@@ -15,25 +21,15 @@ makeObservable<T>(targetIn: T, transaction? : Transaction) : T
 |transaction| An optional transaction|
 |returns| A proxy for the targetIn of the same type |
 
-The proxy automatically extends its effect by creating other proxies for objects as they are referenced and replacing the references with a references for a proxy to the object.  This means that an entire tree of state need only be made observable at the root.  Generally makeObservable is used centrally to produce long-lived objects for a store.  In some cases shorter lived observable components may be needed within a component in which case **useLocalObservable** is used.
-
-The proxy performs these functions on objects:
-* Binds methods to the object so they can be used without an object reference
-* Handles the memoization of any methods annotated as being memoized.
-* Track references to properties in conjunction with **useObservables** or **observe** to enable reactions such as re-rendering when tracked properties are mutated.
-* Considers the top level method call to be an "action" for devtools purposes
-
-Note: makeObservable may be used to take an already observable object and make a new copy of it that is part of a transaction
+**makeObservable** is generally used outside of components at the start of the application to create long-lived observable objects that represent your store.  Observable objects may also be created for shorter live objects, tied to a component using [**useLocalObservable**](#uselocalobservable)
 
 ## useObservables ##
 ```typescript
 useObservables(options? : ObserverOptions) : void
 ```
-Tracks usage of any properties of objects made observable through **makeObservable**.  If any properties referenced during the course of the render are changed the component will be re-rendered.  It will also re-render the component if any child properties of a referenced property are modified.  This is to conform with the immutable conventions for re-rendering when state changes.  Properties that referenced directly in the render code or in any synchronous functions called by the render code are tracked.
+Tracks usage of any observable objects and re-renders the component when any of those properties are mutated.  **useObservables** must only be used in a React functional component.  For class based components use [**bindObservables**](#bindobservables).  Outside of components use [**observe**](#observe).
 
-**useObservables** must only be used in a React functional component and must conform to the rules of hooks in terms of always being called in the same order relative to other hooks that may be used by the component.  
-
-See [observer](#observe) for more details on the ObserverOptions.  The one that is appropriate for consideration in components is **notifyParents**.  It defaults to false meaning that your component will not re-render because it is observing a parent property and one it's child properties is mutated.  If you set it to true ```useObservables({notifyParents: true})``` then a reaction paradigm similar to Redux is followed whereby components referencing parent properties are re-rendered even if a chhild orhose properties is mutated.  This could be useful in edge cases where you have child components that are not Proxily-aware and you want to rerender child components any time a property or descendent property is mutated.
+See [observer](#observe) for more details on the **ObserverOptions**.  One relevant option,  **notifyParents** can be set to true to force re-rendering even when children of tracked properties are mutated. Can be useful if you have child components that don't know about Proxily but still need to be re-rendered when data changes.
 
 ## useObservableProp ##
 ```
@@ -41,13 +37,108 @@ useObservableProp<S>(value: S) : [S, (value: S) => void]
 ```
 Returns an array where the 1st element is a property value and the second a function used to set the property value.  The property is the last one referenced.  By passing a reference to a property in the argument this established the property in the argument as the last reference.
 
-Used like this
+Used like this:
 ```javascript
   const [value, setValue] = useObservableProp(counter.value)
 ```
 **useObservables** must be called before calling **useObservableProp**.
 
 ***setValue*** will be considered an action for tooling such as redux-devtools.
+
+## memoize ##
+Observable objects may have memoized getters or functions through **memoize**.  A memoized function will only be recalculated when any of the state that it consumes changes or when the arguments change.
+
+It can be used as a decorator proceeding a member function
+```typescript
+@memoize()
+```
+or as a function that accepts a class or object, and it's member function name(s)
+```
+memoize (obj : any, propOrProps : string | Array<string>)
+```
+**memoize** can only be used in functions that are properties of an observable object and cannot be used to make standalone functions memoized.  There are other libraries suitable for standalone memoization.
+
+## bindObservables ##
+```
+bindObservables<P> (ClassBasedComponent : React.ComponentType<P>) : (args : P) => any
+```
+Accepts a React class based component as a parameter and creates a function-based high order component that call **useObservables** and render the class based component.  Conceptually the function looks like this:
+```
+function (props : any) {
+    useObservables();
+    return (
+        <ClassBasedComponent {...props}/>
+    )
+}
+```
+
+## nonObservable
+
+Sometimes you need for Proxily to leave certain properties alone and not create a proxy for them since they don't directly contain state and may function improperly if a proxy is created for them.
+
+Two forms of **nonObservable** are allowed for this:
+
+As a decorator proceeding a property
+```typescript
+@nonObservable()
+```
+
+As a function that accepts a class or object, and it's property name(s)
+```
+nonObservable (obj : any, propOrProps : string | Array<string>)
+```
+As a function call to nominate either properties of an object or properties of a class as not being observable
+
+| Item  | Description |
+|-|-|
+|obj| An object or a class |
+|propsOrProps| An array of property names or a single property name|
+
+In both cases the property will not be made observable.  This is important when objects that don't directly represent state are included in an object that will be made observable.
+
+
+## useLocalObservable ##
+Creates an observable object tied to a component life-cycle
+```
+useLocalObservable<T>(callback : () => T, transaction? : Transaction) : T
+```
+Creates an observable object when the component mounts.  Generally this is for shorter lived observable objects.  The call back is only invoked once per component life-cycle and returns and object that will be made observable.  Used like this:
+```
+const sampleListController = useLocalObservable(() => new ListController(sampleToDoList))
+```
+
+## ObservableProvider
+
+A component that creates an observable object and places it in a context of your choice.  Useful when iterating in JSX and requiring a new observable object on each iteration.
+```typescript
+ObservableProvider = ({context, value, dependencies, transaction, children} : {
+    context : any, 
+    value : Function | any, 
+    dependencies : Array<any>, 
+    transaction?: Transaction, 
+    children: any})
+```
+
+| Options  | Description |
+|-|-|
+| context | A context created by React.createContext |
+| value | A callback function that will return an object to be made observable or the object itself |
+| dependencies | An array of values that will be used to memoized the creation of a new object based when the values change |
+| transaction | An optional transaction if the observable object is to be part of a transaction |
+| children | Child components are automatically passed in by using the component in JSX |
+
+Here is an example that creates a new observable object for each todoListItem:
+```
+<ObservableProvider key={index} context={ListItemContext} dependencies={[item]}
+                    value={() => new ListItemController(listController, item)}>
+    <ListItem key={index}/>
+</ObservableProvider>
+```
+In the component you reference the observable like this
+```
+    const listItem = useContext(ListItemContext)
+```
+ListItemContext must be created with React.createContext
 
 ## observe ##
 ```typescript
@@ -68,7 +159,7 @@ Used outside a component to observe state changes.  For example, **persist** use
 | Item  | Description |
 |-|-|
 |targetIn| An observable object |
-|onChange| A function that will be called when state in targetIn or it's descendents change|
+|onChange| A function that will be called when state in targetIn, or it's descendents change|
 |observer| A function that is called to reference any properties that are to be observed.  If omitted all changes will be observed|
 |observationOptions| see below |
 
@@ -78,29 +169,20 @@ Used outside a component to observe state changes.  For example, **persist** use
 | delay | defaults to undefined which means that reactions are synchronous.  Set to a time delay if you wish reactions to be debounced to a given time interval in milliseconds |
 | notifyParents | defaults to false meaning that if a state is mutated, only observers of that property will be notified.  If set to true, observers of parents of the state are also notified as is the case for the immutable paradigm |
 
-## memoize ##
-Observable objects may have memoized getters or functions through **memoize**.  A memoized function will only be recalculated when any of the state that it consumes changes or when the arguments change.
+## groupUpdates
 
-It can be used as a decorator proceeding a member function
+Reactions to updates are normally batched such that they occur once per high-level function call.  In async functions this is not the case and so you can force the reactions to be batched by placing them in a **groupUpdates** callback
 ```typescript
-@memoize()
+groupUpdates = (callback : Function))
 ```
-or as a function that accepts a class or object, and it's member function name(s)
-```
-memoize (obj : any, propOrProps : string | Array<string>)
-```
-**memoize** can only be used functions that are properties of an observable object and cannot be used to make standalone functions memoized.  There are other libraries suitable for standalone functions.
-
-## bindObservables ##
-```
-bindObservables<P> (ClassBasedComponent : React.ComponentType<P>) : (args : P) => any
-```
-Accepts a React class based component as a parameter and creates a function-based high order component that call **useObservables** and render the class based component.  Conceptually the function looks like this:
-```
-function (props : any) {
-    useObservables();
-    return (
-        <ClassBasedComponent {...props}/>
-    )
+Example:
+```typescript
+async doSomething () {
+    this.prop1 = 100;
+    await (new Promise((res : any) =>setTimeout(()=>res(), 1000)));
+    groupUpdates( () => {
+        this.prop2 = 200;
+        this.prop3 = 300;
+    })
 }
 ```

@@ -33,14 +33,14 @@ setLogLevel(levels : Partial<LogLevels>)
 ```
 
 Sets the logging level globally for the application:
-* **render** logs the rendering of each functional component along with the number of renders thus far.  Note that with **React.StrictMode**, now enabled by default in **Create React App**, you will see the render number go up in increments of two because an extra render occurs in development mode to weed out side effects. '''ListItem render (2)'''
+* **render** logs the rendering of each functional component along with the number of renders thus far.  Note that with **React.StrictMode**, now enabled by default in **Create React App**, you will see the render number go up in increments of two because an extra render occurs in development mode to weed out errors in side effects. '''ListItem render (2)'''
 
 * **propertyTracking** logs each property that a component renders react-start ```
   ListItem Observer tracking ListController.selectedItem, StyleController.todoListStyle, TodoListStyle.listFontColor, TodoListStyle.fontSize, ToDoListItem.title, ToDoListItem.completed```
 
 * **propertyChange** logs each time a property is mutated '''ToDoListItem.title = Hi'''
 
-Note that the class name (e.g. **TodoListItem**) is only logged when you use classes.  Otherwise it would show as ```Object.title = Hi```
+Note that the class name (e.g. **TodoListItem**) is only logged when you use classes.  Otherwise, it would show as ```Object.title = Hi```
 ## setLog
 
 ```

@@ -11,9 +11,9 @@ A transaction is a context for state.  There is a default transaction that is au
 | usage | useTransactable | makeTransactable |
 
 
-* **new Transaction**  in code outside a component
-* **useTransaction** with a component
-* **TransactionProvider** create a transaction using jsx and place it in a context
+* [**new Transaction**](#transaction)  in code outside a component
+* [**useTransaction**](#usetransaction) with a component
+* [**TransactionProvider**](#transactionprovider) create a transaction using jsx and place it in a context
 
 ## Transaction 
 ```typescript
@@ -28,23 +28,23 @@ The transaction object has these properties and methods:
 
 | Property / Method  | Description |
 |-|-|
-|cleanup()| Cleanup any resources used by the transaction. Recommended when creating a transaction manually via **new Transaction**  |
-|updateSequence : number| a number assigned to each state update that can be saved and then useed in a **rollTo** called to time travel to that state|
-|rollTo(sequence : number)| Time travel to a particular state |
 |undo()|Go back to the last state prior to the last top level method call|
-|redo()|After having gone backward, redo() can go forward to the state after the next top level method call|
-|canUndo : boolean|True if there is a prior state than can be travelled to via undo()|
-|canRedo : boolean|True if there is a next state that can be travelled to via redo()|
-|commit()|Commit any changes in state related to the transaction back to main state associated with the default transaction|
-|rollback()|Restore state associated with this transaction from the main state associated with the default transaction|
+|redo()|After undo(), redo() can go forward to the state after the next top level method call|
+updateSequence : number| a number assigned to each state update that can be saved and then used in a **rollTo** called to time travel to that state|
+|rollTo(sequence : number)| Time travel to a particular state |
+|canUndo : boolean|**true** if there is a prior state than can be travelled to via undo()|
+|canRedo : boolean|**ture** if there is a next state that can be travelled to via redo()|
+|commit()|Commit state changes in the transaction back to main state|
+|rollback()|Restore state from the main state|
+|cleanup()| Cleanup any resources used by the transaction. Recommended when creating a transaction manually via **new Transaction**  |
 
 Additionally, there is a static method for applying options (timeTravel) to your original state
 ```
 Transaction.createDefaultTransaction(options? : Partial<TransactionOptions>)
 ```
-If called prior to making any observables can be used to set options for the default transaction(primarily timePositioning) which allows undo/redo to be used for main state.
+If called prior to making any observables can be used to set options for the default transaction(primarily timePositioning) which allows undo/redo to be used for the main state.
 
-> Commit and Rollback work at the object level.  This means that were you to make changes to the same object outside of the transaction and inside the transaction, the object in the transaction will take precidence when you commit.  This includes Arrays, Sets and Maps which are replaced as a whole.
+> Commit and Rollback work at the object level.  This means that were you to make changes to the same object outside the transaction and inside the transaction, the object in the transaction will take precedence when you commit.  This includes Arrays, Sets and Maps which are replaced as a whole.
 
 > Commit only creates the copy of the state as you reference objects and so it is best to reference all the data you need immediately after creating the transaction.
 
@@ -54,7 +54,7 @@ If called prior to making any observables can be used to set options for the def
 ```typescript
 useTransaction(options? : Partial<TransactionOptions>)
 ```
-It has the benefit that it will automatically cleanup the transaction when the component dismounts.  The transaction can then be used in calls to **useTransactable**
+It has the benefit that it will automatically clean up the transaction when the component dismounts.  The transaction can then be used in calls to **useTransactable**
 ## useTransactable
 
 ```typescript
@@ -70,4 +70,30 @@ Creates a copy of a part of the state tree that can be mutated independently as 
 
 ## makeObservable ##
 
-[**makeObservable**](observable#makeobservable) also accepts a transaction and is used as the equivalent of useTransactable outside of a functional component.
+[**makeObservable**](observable#makeobservable) also accepts a transaction and is used as the equivalent of useTransactable outside a functional component.
+
+
+## TransactionProvider
+A component that creates a new transaction and puts it into a TransactionContext:
+```
+TransactionProvider ({transaction, options, children} :
+{transaction? : Transaction, options? : TransactionOptions, children: any})
+```
+Proxily provides this helper to do that for you.
+```typescript jsx
+import {TransactionProvider} from 'proxily';
+function App () {
+    return (
+        <TransactionProvider>
+            <UpdateCustomer customer={customer} />
+        </TransactionProvider>
+    )
+}
+```
+Then reference the transaction with useContext
+```typescript
+import {TransactionContext} from 'proxily';
+...
+const updateAddressTxn = useContext(TransactionContext);
+```
+You don't need to create the context as it can be imported from proxily

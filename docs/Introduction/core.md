@@ -5,7 +5,7 @@ id: core
 ---
 
 ## Observables
-Proxily tracks references to state while your component renders.  It then ensures that your component is re-rendered anytime the referenced state properties change.  You make your state "observable" with [**makeObservable**](../API/observable#makeobservable) and then ask Proxily to track references with [**useObservables**](../API/observable#useObservable).
+Proxily tracks references to state while your component renders.  It then ensures that your component is re-rendered anytime the referenced state properties change.  You make your state "observable" with [**makeObservable**](../API/observable.md#makeobservable) and then ask Proxily to track references with [**useObservables**](../API/observable#useobservables).
 ```javascript
 class CounterState {  // Your State
     value = 0;  
@@ -41,7 +41,7 @@ Proxily uses standard Javascript language features to define the traditional ele
 
 * **Stores** - A store in Proxily is simply an object that you have made observable and is usually the root object in your state.  It may contain cyclic references, and you may have multiple observable root objects.  You can create global stores or local stores that are only needed for a single component or small group of components. You can pass around the root of the store or any part of the store to your components as properties, contexts or simply import it.
 
-* **Actions** - Actions are usually responses to users interacting with your component. Any function that is a member of an observable object can be an action.  Proxily tracks the nesting of calls such that the top level function you call is considered to be the action for purposes of tooling and batching of reactions. You may also spin off asynchronous actions that use promises or that schedule tasks using redux-sagas. 
+* **Actions** - Actions are usually responses to users interacting with your component. Any function that is a member of an observable object can be an action.  Proxily tracks the nesting of calls such that the top level function you call is considered to be the action for purposes of tooling and batching of reactions. You may also spin off asynchronous actions that use promises or that schedule tasks using Redux-saga. 
 
 * **Selectors** - A selector is simply a Javascript [getter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get) method on an observable object.  You may optionally [memoize](../Features/observables#memoization) the selector for better performance on expensive calculations (e.g. sorts and filters).
 

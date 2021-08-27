@@ -2,7 +2,7 @@
 title: Transactions
 sidebar_position: 4
 ---
-Transactions are a mechansims to make a copy of your state that is independent of the original state.  It may be mutated independently and then the results merged back into the original state or undone.  Along the way you can undo and redo changes to state.  
+Transactions are a mechanisms to make a copy of your state that is independent of the original state.  It may be mutated independently and then the results merged back into the original state or undone.  Along the way you can undo and redo changes to state.  
 
 While there are other solutions to achieving rollback and undo, they generally affect the state as whole.  For example, you could take snapshots of state and restore them. The benefit of Transactions is that rollback or undo only effects the part of the state that you mutate.  Other parts of your state are unaffected by the rollback or undo. This means you can, for example, have asynchronous parts of your application continue to update other parts of your state during a transaction life span.
 
@@ -20,7 +20,7 @@ To use a transaction in a component follow these steps:
 * Call [**useObservables**](../API/observable#useobservables) as usual at the start of your render
 * Create the transaction with [**useTransaction**](../API/transactions#usetransaction)
 * Call [**useTransactable**](../API/transactions#usetransactable) to get a transactable copy of the data you wish to make independent changes to. Proxily will automatically make subordinate objects transactable as you reference them from the transactable copy.
-* Call [**commit()**](../API/transactions#transaction) or [**rollback()**](../API/transactions#transaction) on the transaction when the user interaction is complete and you wish the changes in your copies of the data to be reflect back to the original
+* Call [**commit()**](../API/transactions#transaction) or [**rollback()**](../API/transactions#transaction) on the transaction when the user interaction is complete, and you wish the changes in your copy of the data to be copied back to the original state.
 ```typescript jsx
 function UpdateCustomer ({customer} : {customer : Customer}) {
     useObservables();
@@ -49,7 +49,7 @@ function UpdateCustomer ({customer} : {customer : Customer}) {
 The time positioning feature in Proxily supports:
 * **undo** - undo changes from the last action (top level method call)
 * **redo** - redo the last undo
-* **rollTo** - process multiple undo/redos to arrive at specific point in time
+* **rollTo** - process multiple undo/redo calls to arrive at specific point in time
 
 **commit** and **rollback** are independent of **undo** / **redo** and can both be used in the same transaction.
 

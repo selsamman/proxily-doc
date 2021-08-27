@@ -4,13 +4,13 @@ title: Tooling
 ---
 Aside from your normal Javascript debugger enhanced by react-devtools you also have two other debugging features:
 * Integration with Redux-devtools which lets you monitor actions and state
-* Detailed logging of state change, oberver property tracking and state mutation so you know exactly where state is changing.
+* Detailed logging of state change, observer property tracking and state mutation, so you know exactly where state is changing.
 
 ## Redux DevTools ##
 
 [Redux-DevTools](https://github.com/zalmoxisus/redux-devtools-extension) is a Chrome extension designed for Redux which monitors actions and state changes.  It also allows you to "time travel" to the state after any past action was fired.  Actions are simply the highest level member function called that mutates state.
 
-Integration is simply including [**configureReduxDevTools**](../API/tools#configureReduxDevTools) before you make any objects observable and [**initReduxDevTools**](../API/tools#initReduxDevTools) after your state is setup:
+Integration is simply including [**configureReduxDevTools**](../API/tools#configurereduxdevtools) before you make any objects observable and [**initReduxDevTools**](../API/tools#initreduxdevtools) after your state is set up:
 ```typescript
 configureReduxDevTools();
 const classes = Object.values(require('./store'));

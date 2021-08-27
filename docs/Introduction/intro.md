@@ -9,7 +9,7 @@ Proxily is a library for managing state in a non-prescriptive way. It re-renders
 
 * Serialization and deserialization including complex state (cyclic data and classes)
 * Persist state to localStorage, sessionStorage or other storage systems
-* Asynchronous semantics through redux-sagas
+* Asynchronous semantics through Redux-saga
 * Time travel (undo, redo) in applications and with redux-devtools
 * Transactions that allow asynchronous changes to be committed or rolled back
 * Rich support for Typescript, classes and objects including automatic function binding
@@ -43,4 +43,4 @@ function App() {
 ## Compatability
 Because of it's use of ES6 Proxies, Proxily does not support Internet Explorer and requires 0.69 or higher of React-Native.  Proxily is written in Typescript and targets ES6. Therefore, it is advisable to target ES6 in your applications and enjoy the smaller code size.
 ## Dependencies
-Aside from React and React-dom, Proxily has no dependencies.  If you make use of redux-sagas integration then you must add redux-saga to your project and additionally events in react-native.
+Aside from React and React-dom, Proxily has no dependencies.  If you make use of Redux-saga integration then you must add redux-saga to your project and additionally events in react-native.
