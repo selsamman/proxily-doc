@@ -15,7 +15,7 @@ A transaction is a context for state.  There is a default transaction that is au
 * **useTransaction** with a component
 * **TransactionProvider** create a transaction using jsx and place it in a context
 
-## new Transaction 
+## Transaction 
 ```typescript
 new Transaction(options? : Partial<TransactionOptions>)
 
@@ -38,11 +38,17 @@ The transaction object has these properties and methods:
 |commit()|Commit any changes in state related to the transaction back to main state associated with the default transaction|
 |rollback()|Restore state associated with this transaction from the main state associated with the default transaction|
 
-Additionally there is a static method
+Additionally, there is a static method for applying options (timeTravel) to your original state
 ```
 Transaction.createDefaultTransaction(options? : Partial<TransactionOptions>)
 ```
 If called prior to making any observables can be used to set options for the default transaction(primarily timePositioning) which allows undo/redo to be used for main state.
+
+> Commit and Rollback work at the object level.  This means that were you to make changes to the same object outside of the transaction and inside the transaction, the object in the transaction will take precidence when you commit.  This includes Arrays, Sets and Maps which are replaced as a whole.
+
+> Commit only creates the copy of the state as you reference objects and so it is best to reference all the data you need immediately after creating the transaction.
+
+
 ## useTransaction 
 **useTransaction** can be used in a functional component to create a transaction
 ```typescript
