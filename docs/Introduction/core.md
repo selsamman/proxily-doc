@@ -49,7 +49,7 @@ While the proxily doesn't have a fixed opinion on how you set these up, you shou
 
 ### POJOs
 
-With traditional state management systems such as Redux you create your state using "plane old javascript objects" (POJOs), define reducers to generate a new state, and actions which are dispatched to invoke the reducers.  In Proxily you don't need reducers as your actions simply modify state directly.  You can, however, keep your state as POJOs and define your actions and selectors separately thus keeping a more traditional taxonomy:
+With traditional state management systems such as Redux you create your state using "plane old javascript objects" (POJOs), define reducers to generate a new state, and actions which are dispatched to invoke the reducers.  In Proxily you don't need reducers as your actions modify state directly.  You can, however, keep your state as POJOs and define your actions and selectors separately thus keeping a more traditional taxonomy:
 
 ``` typescript jsx
     const store = persist({
@@ -81,44 +81,42 @@ With traditional state management systems such as Redux you create your state us
 ```
 Notice that we added **persist** here to save and restore the state to local storage.  In addition to saving and restoring your state to local or session storage, **persist** also makes the object observable.
 ### Classes
-Classes, as we saw at the start of the chapter, offer a more compact way of expressing the problem domain. They are not popular in React, simply because no framework, thus far, has made them easy to work with.  In Redux, they are a non-starter and in other frameworks such as mobx they are welcomed but still come with some limitations:
-* You can't easily persist them since the framework does not know how to reconstitute them.
-* Referencing member functions always requires an object reference to make "this" function correctly.
+Classes, as we saw at the start of the chapter, offer a more compact way of expressing the problem domain. They do, however, have some challanges:
 
-Proxily takes care of both issues.  Hopefully you spent some time wondering how the class-based example at the start could actually work?  
+* They are harder to serialize
+* Member functions must always be invoked as an object reference to set "this" correctly
 
-After all we just destructured ***increment*** from ***counter***
-```typescript
-const {value, increment} = counter;
-```
-and then used it without an object in the  reference (e.g. counter.increment())
-```typescript jsx
-<button onClick={increment}>Increment</button>
-```
-You would expect this to fail and might decide, as many have, that classes are just evil and should be avoided.  It won't fail, however.  That is because **Proxily binds all members of an observable object to the target**. This takes away one of the key pain-points of using classes.
+Proxily solves both issues. 
 
-The other issue, serializing and deserializing object graphs with classes, is also tackled by Proxily. Just provide a list of the classes you use:
+For serialization and persistence to work just provide list of the classes:
 ```typescript
     const state = persist({
         counter: new CounterState()
     }, {classes: [CounterState]});
 ```
-When serializing, Proxily will record the name of the class from the constructor and use that name to find the class you provided to reconstitute the object when serializing.
+As to not requiring an object reference for member functions, you may have wondered how our class-based example got away with destructuring ***increment*** from ***counter***
+```typescript
+const {value, increment} = counter;
+```
+and then using it without an object reference (e.g. counter.increment())
+```typescript jsx
+<button onClick={increment}>Increment</button>
+```
+Proxily binds all members of an observable object to the target. This takes away one of the key pain-points of using classes.
+
 
 ### Your App, Your Choice
 
-The choice of using POJOs or classes for your state is yours to make and Proxily works equally well with both.  Given that Proxily makes classes more seamless you are free to reap the tangible benefits they provide:
+The choice of using POJOs or classes for your state is yours to make and Proxily works equally well with both.  Classes do, however, provide some tangible benefits:
 
-* State and the code to modify that state are bound together, so it is clear which code is mutating your state.  This can be enforced using private properties.
+* State and the code to modify that state are bound together, so it is clear which code is mutating which state.  This can be enforced using private properties.
 
-* Classes are the most compact way to define types in Typescript because you are defining both the types and the initial state values together.  Classes are more of a standard feature than using Typescript interfaces which would otherwise be needed to accurately type your state.
+* Classes are the most direct way to define types in Typescript.  They combine describing and typing state with assigning initial values, taking advantage of inference in many cases. 
 
-* Because initial values are defined with the class you are assured that all new state objects have the correct initial state no matter how deeply they are nested.
+* Defining initial values within the class ensures objects are initialized correctly.
 
 * There is one single interface for both consuming and modifying any object in your state so there is no need to import a separate interface with actions and selectors. 
 
-* You don't usually need to pass in instance identifiers as parameters to your actions, making for tidier JSX  ```onClick={toggleTodo}``` vs ```onClick={()=>toggleTodo(toDo)}```. In deeply nested structures with multiple levels of arrays you may have to pass in multiple levels of identifiers. 
+* You don't need to pass instance identifiers in your actions. 
 
-* Class names travels with the data making it possible to [log](../Features/tools#logging) both the class and method when state is mutated. Same for redux-devtools integration.
-
-Needless to say, used improperly, classes can be a burden.  Unless you are an experienced OO programmer you may want to leave inheritance out of the picture and just uses classes as convenient containers for organizing your state and the code that modifies your state.
+* Class names are attached to your data making it possible to [log](../Features/tools#logging) both the class and method when state is mutated.
