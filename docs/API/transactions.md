@@ -4,15 +4,8 @@ title: Transaction API
 ---
 A transaction is a context for state.  There is a default transaction that is automatically created.  Additional transactions may be created to create a copy of the state so that state may be mutated independently and then committed back to the default transaction. There are several ways to create a transaction:
 
-
-| | Component  | Methods |
-|-|-|
-| creation | TransactionProvider | new Transaction |
-| usage | useTransactable | makeTransactable |
-
-
+* [**useTransaction**](#usetransaction) within a component
 * [**new Transaction**](#transaction)  in code outside a component
-* [**useTransaction**](#usetransaction) with a component
 * [**TransactionProvider**](#transactionprovider) create a transaction using jsx and place it in a context
 
 ## Transaction 
@@ -50,11 +43,11 @@ If called prior to making any observables can be used to set options for the def
 
 
 ## useTransaction 
-**useTransaction** can be used in a functional component to create a transaction
+**useTransaction** can creates a transaction for use in a component.
 ```typescript
 useTransaction(options? : Partial<TransactionOptions>)
 ```
-It has the benefit that it will automatically clean up the transaction when the component dismounts.  The transaction can then be used in calls to **useTransactable**
+The transaction can then be used in calls to **useTransactable**
 ## useTransactable
 
 ```typescript
@@ -68,9 +61,9 @@ Creates a copy of a part of the state tree that can be mutated independently as 
 |targetIn| An observable object|
 |transaction| A transaction created by **new Transaction**, **useTransaction** or **TransactionProvider** |
 
-## makeObservable ##
+## observable ##
 
-[**makeObservable**](observable#makeobservable) also accepts a transaction and is used as the equivalent of useTransactable outside a functional component.
+[**observable**](observable#observable) also accepts a transaction and is used as the equivalent of useTransactable outside a functional component.
 
 
 ## TransactionProvider

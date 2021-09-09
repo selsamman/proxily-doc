@@ -19,10 +19,10 @@ const FeatureList = [
     description: (
       <>
         <ul style={{textAlign: "left"}}>
-            <li> Serialization & Persistence</li>
+            <li> Serialization & persistence</li>
             <li> Redux-sagas, Redux-devtools</li>
-            <li> Time travel, undo/redo</li>
-            <li> Transactions (commit & rollback)</li>
+            <li> Undo, redo, commit, rollback</li>
+            <li> Concurrent mode branching</li>
          </ul>
       </>
     ),
@@ -32,7 +32,7 @@ const FeatureList = [
     Icon: FcGraduationCap,
     description: (
       <>
-        With no specific requirements on how to define state and logic, Proxily is easy to work with.  Your code will be straight forward, easy to follow and easy to test.
+        Without specific requirements on how to define state & logic, Proxily is easy to work with.  Code will be straight forward, easy to read and easy to test.
       </>
     ),
   },

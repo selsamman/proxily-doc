@@ -2,12 +2,12 @@
 sidebar_position: 1
 title: Observable API
 ---
-## makeObservable ##
+## observable ##
 ```typescript
-makeObservable<T>(targetIn: T, transaction? : Transaction) : T
+observable<T>(targetIn: T, transaction? : Transaction) : T
 ```
 
-**makeObservable** returns a proxy for a state object that will:
+**observable** returns a proxy for a state object that will:
 * Track references to properties when used [**useObservables**](#useobservables).
 * React to property changes.  Components that call [**useObservables**](#useobservables) are re-rendered when properties those components reference are mutated.  
 * Performs tracking and reacting outside of React components using [**observe**](#observe)
@@ -21,12 +21,36 @@ makeObservable<T>(targetIn: T, transaction? : Transaction) : T
 |transaction| An optional transaction|
 |returns| A proxy for the targetIn of the same type |
 
-**makeObservable** is generally used outside of components at the start of the application to create long-lived observable objects that represent your store.  Observable objects may also be created for shorter live objects, tied to a component using [**useLocalObservable**](#uselocalobservable)
+**observable** is generally used outside of components at the start of the application to create long-lived observable objects that represent your store.  Observable objects may also be created for shorter live objects, tied to a component using [**useLocalObservable**](#uselocalobservable)
 
-## useObservables ##
-```typescript
-useObservables(options? : ObserverOptions) : void
+## observer ##
+Wraps a component, making it an [**observer**] so it can react to any changes in referenced properties by rendering. 
 ```
+function observer<P>(Component : FunctionComponent<P>, 
+         options? : ObserverOptions) : NamedExoticComponent<P>
+```
+See [**observe**](#observer) for a description of options though they are rarely needed. 
+
+As with other wrappers such as **React.memo** several syntax options are available.
+```typescript
+function Value1 () { s
+    return (<div>{state.value1}</div>);
+}
+export default observer(Value1)
+```
+or for exporting named properties:
+```typescript
+export const Value1 = observer(function Value1 () { 
+    return (<div>{state.value1}</div>);
+});
+```
+finally this can be used but it won't preserve the name of the component for debugging:
+```
+export const Value1 = observer(() => { 
+    return (<div>{state.value1}</div>);
+});
+```
+
 Tracks usage of any observable objects and re-renders the component when any of those properties are mutated.  **useObservables** must only be used in a React functional component.  For class based components use [**bindObservables**](#bindobservables).  Outside of components use [**observe**](#observe).
 
 See [observer](#observe) for more details on the **ObserverOptions**.  One relevant option,  **notifyParents** can be set to true to force re-rendering even when children of tracked properties are mutated. Can be useful if you have child components that don't know about Proxily but still need to be re-rendered when data changes.
@@ -41,7 +65,7 @@ Used like this:
 ```javascript
   const [value, setValue] = useObservableProp(counter.value)
 ```
-**useObservables** must be called before calling **useObservableProp**.
+Can only be used in a component wrapped as an [**observer**](#observer).
 
 ***setValue*** will be considered an action for tooling such as redux-devtools.
 

@@ -17,13 +17,12 @@ While there are other solutions to achieving rollback and undo, they generally a
 ## Creating a Transaction
 
 To use a transaction in a component follow these steps:
-* Call [**useObservables**](../API/observable#useobservables) as usual at the start of your render
+* Component should be wrapped as an [**observer**](../API/observable#observer)
 * Create the transaction with [**useTransaction**](../API/transactions#usetransaction)
 * Call [**useTransactable**](../API/transactions#usetransactable) to get a transactable copy of the data you wish to make independent changes to. Proxily will automatically make subordinate objects transactable as you reference them from the transactable copy.
 * Call [**commit()**](../API/transactions#transaction) or [**rollback()**](../API/transactions#transaction) on the transaction when the user interaction is complete, and you wish the changes in your copy of the data to be copied back to the original state.
 ```typescript jsx
 function UpdateCustomer ({customer} : {customer : Customer}) {
-    useObservables();
     const updateAddressTxn = useTransaction();
     customer = useTransactable(customer, updateAddressTxn);
     const {name, phone, setName, setPhone} = customer;
@@ -42,6 +41,7 @@ function UpdateCustomer ({customer} : {customer : Customer}) {
         </>
     )
 }
+export default observer(UpdateCustomer);
 ```
 
 ## Undo 

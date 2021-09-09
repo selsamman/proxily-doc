@@ -24,12 +24,11 @@ npm install proxily
 ## Import & Use
 
 ```typescript
-import {makeObservable, useObservables} from 'proxily';
+import {observable, useObservables} from 'proxily';
 
-const counter = makeObservable({value: 0});
+const counter = observable({value: 0});
 
 function App() {
-    useObservables();
     return (
         <div>
             <span>Count: {counter.value}</span>
@@ -39,6 +38,8 @@ function App() {
         </div>
     );
 }
+
+export default observer(App);
 ```
 ## Compatability
 Because of it's use of ES6 Proxies, Proxily does not support Internet Explorer and requires 0.69 or higher of React-Native.  Proxily is written in Typescript and targets ES6. Therefore, it is advisable to target ES6 in your applications and enjoy the smaller code size.

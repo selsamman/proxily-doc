@@ -10,7 +10,7 @@ import {migrate, persist} from 'proxily';
 const persistedObservableState = persist(state, 
     {classes: [TodoList, TodoListItem]});
 ```
-**persist** makes the returned state observable, so you don't need to call makeObservable.  When using classes you need to provide a list of them so that your state can be properly reconstituted. 
+**persist** makes the returned state observable, so you don't need to call observable.  When using classes you need to provide a list of them so that your state can be properly reconstituted. 
 
 Persist has a number of [options](../API/serial_persist#persist) such as which storage engine to use and how you want to merge your state.  You can provide a function to merge in the saved state with your initial state providing for upgrades to the state shape.
 
@@ -36,7 +36,7 @@ And then get the values from that index file
 ```typescript
 const classes = Object.values(require('./store'));
 ```
-**There are [restrictions](#restrictions) on what can be in your state in order to persist or serialize it**
+**There are some [restrictions](#restrictions) on what can be in your state in order to persist or serialize it**
 ### Serialization
 Serialization lets you take snapshots of your state.  It is also used internally by **persist** when you want to save and restore your state to local or session storage.  Proxily supports the serialization of complex objects, including cyclic references and classes.
 

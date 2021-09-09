@@ -45,7 +45,7 @@ class Container {
     }
 }
 ```
-const container = makeObservable(new Container());
+const container = observable(new Container());
 container.invokeTask();
 ```
 

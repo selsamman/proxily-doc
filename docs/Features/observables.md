@@ -4,10 +4,28 @@ sidebar_position: 1
 ---
 Observing state changes and reacting to them is the core of how Proxily manages state.  The process involves two pieces:
 
-* **Observable** objects, created by [**makeObservable**](../API/observable#makeobservable), are ES6 proxies that monitor both references to and mutations of state properties of the original object. The proxy effect cascades automatically as you reference properties that contain other objects, such that all objects you reference from an observable object also become observable.
-* **Observers** are created for each component that uses [**useObservables**](../API/observable#useobservables).  The observer is notified about both references to and mutations of all observable properties.  When a property is mutated and that same property has been referenced a reaction occurs.  In the case of **useObservables** that reaction is to re-render the component.
+* **Observable** objects, wrapped by [**observable**](../API/observable#observable). That monitor both references to and mutations of state properties of the original object. The monitoring effect cascades automatically as you reference properties that contain other objects, such that all objects you reference from an observable object also become observable.
+  ```typescript
+  const state = observable({value1: "foo", value2: "bar"});
+  ```
+* **Observers** are notified about both references and mutations of observable objects and their properties.  This enables them to track the specific properties referenced and react a referenced property is mutated.
 
-Observers may also be created outside of components using [**observe**](../API/observable#observe) so that other parts of your application can leverage this feature.  For example, you could implement an observer that keeps a "last modified" date current or that transmits partial form updates to  server.  Internally [**persist**](persistence) uses observers to know when your state must be saved to local storage.
+  * Components become observers when wrapped in **observer**.
+    ```typescript jsx
+    function Value1 () {  // Render if value1 changes
+        return (<div>{state.value1}</div>);
+    }
+    export default observer(Value1)
+    ``` 
+  
+  * Observers may be setup outside a component using [**observe**](../API/observable#observe). 
+    ```typescript jsx
+    observe(
+        state, // Object to be observe
+        () => console.log('Value1 changed'),  // Reaction 
+        (state) => state.value1 // Only if value1 changes
+    );
+    ``` 
 
 ## Observable Objects
 
@@ -30,26 +48,30 @@ In addition to providing the mutation detection observable objects also:
 To get the value of a property in a component you need only reference it.  While you could mutate the property directly in the component this is considered an anti-pattern.  Instead, one should always use an action to mutate data.  [**useObservableProp**](../API/observable#useobservableprop) will automatically create such an action for any property reference. It returns an array with a getter as the first element and a setter as the second, much like Reacts useState.  
 
 ```javascript
-const counter = makeObservable({
+const counter = observable({
   value: 0
 });
 
 function App() {
-	
-  useObservables();
-  
+
   const [value, setValue] = useObservableProp(counter.value)
   
   return (
     <div>
-      <span>Count: {value}</span>
-      <button onClick={() => setValue(value + 1)}>Increment</button>
+      <span>
+          Count: {value}
+      </span>
+      <button onClick={() => setValue(value + 1)}>
+          Increment
+      </button>
     </div>
   );
 
 }
+
+export default observable(App);
 ```
-> The argument must be an actually references the property rather than just the value.
+> **useObservableProp** must be passed an actually reference to the property rather than just the value.   ```useObservableProp(counterValue)``` won't work.
 
 ## Function Binding ##
 Proxily automatically binds functions to their target object to ensure that "this." will always point to the correct object.
@@ -58,11 +80,11 @@ Proxily automatically binds functions to their target object to ensure that "thi
 const {increment} = counter;
 increment(); 
 ```
-is equivalent to.
+can be used in addition to
 ```
 counter.increment()
 ```
-This makes classes far more intuitive to consume since you don't have to know about the implementation of functions. 
+This makes classes far more intuitive to consume. 
 
 ## Memoization ##
 
@@ -118,40 +140,43 @@ With Proxily all state mutations are synchronous and never batched.  Instead, th
 * Since asynchronous methods return a promise in response to the first await, all reactions to state changes cannot be batched. Either make state changes in asynchronous functions part a deeper method call or group them with [**groupUpdate**](../API/observable#groupupdates)
 
 ## Class Components ##
-If you have class based components you can wrap them in a high order component (HOC) that calls **useObservables** and passes through properties to the class.  Proxily provides a handy function [**bindObservables**](../API/observable#bindobservables) that does this for you:
+If you have class based components you can wrap them in a high order functional component (HOC) that is further wrapped in **observer**.  Proxily provides a handy function [**bindObservables**](../API/observable#bindobservables) that does this for you:
 ```typescript jsx
-  class CounterState { // Your state
-        private _value = 0;
-        get value () {
-            return this._value
-        }
-        increment () {this._value++}
-  }
-    
-  const state = makeObservable({  // Your Observable state
-        counter: new CounterState()
-  });
-    
-  // Class Based Component
-  class CounterClass extends React.Component<{counter : CounterState}> {
-        render () {
-            const {value, increment} = this.props.counter;
-            return (
-                <div>
-                    <span>Count: {value}</span>
-                    <button onClick={increment}>Increment</button>2
-                </div>
-            );
-        }
+class CounterState { // Your state
+    private _value = 0;
+    get value() {
+        return this._value
     }
 
-  // Wrap class-based component to make properties observable
-  const Counter = bindObservables(CounterClass);
-    
-  function App () {
+    increment() {
+        this._value++
+    }
+}
+
+const state = observable({  // Your Observable state
+    counter: new CounterState()
+});
+
+// Class Based Component
+class CounterClass extends React.Component<{ counter: CounterState }> {
+    render() {
+        const {value, increment} = this.props.counter;
         return (
-            <Counter counter={state.counter}/>
+            <div>
+                <span>Count: {value}</span>
+                <button onClick={increment}>Increment</button>
+            </div>
         );
-  }
+    }
+}
+
+// Wrap class-based component to make properties observable
+const Counter = bindObservables(CounterClass);
+
+function App() {
+    return (
+        <Counter counter={state.counter}/>
+    );
+}
 ```
 
