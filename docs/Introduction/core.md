@@ -47,20 +47,14 @@ State managers often combine everything into a store. In Proxily we break things
 Proxily doesn't have a fixed opinion on how you set these up, though picking a pattern and sticking with it is advised.
 
 ## Why Classes?
-Most of our examples use classes. While you are free to define your state as a plain Javascript object and define actions and selectors separately there are some features that require that functions be bound to your state (e.g. objects).  This includes features unique to Proxily that provide multiple temporal views of your state for transactions and concurrent rendering (React 18).  Javascript objects (prototypal inheritance) would accomplish this but requires manual serialization and persistence. 
+Most of our examples use classes. While you can define your state as a plain objects and define actions and selectors separately, features such as selectors and transactions require that functions be bound to your state as objects. Classes are the easiest way to accomplish this and provide these benefits:
 
-Therefore, the easiest way to get the full benefits of Proxily is to use classes and enjoy these benefits that they provide:
+* State and the code to modify that state are bound together so you know which code mutates state.  This can be enforced using private properties.
 
-* State and the code to modify that state are bound together, so it is clear which code is mutating which state.  This can be enforced using private properties.
+* Classes combine typing with defining initial values so objects are always initialized correctly.  This makes persisting state automatic.
 
-* Classes are the most direct way to define types in Typescript.  They combine describing and typing state with assigning initial values, taking advantage of inference in many cases.
-
-* Defining initial values within the class ensures objects are initialized correctly.
-
-* There is one single interface for both consuming and modifying any object in your state so there is no need to import a separate interface with actions and selectors.
-
-* You don't need to pass instance identifiers in your actions.
+* There is one single interface for both consuming and modifying state without the need to pass instance identifiers to actions.
 
 * Class names are attached to your data making it possible to [log](../Features/tools#logging) both the class and method when state is mutated.
 
-Classes, like any feature, can certainly be misused - for example overuse of inheritance.  If you keep it simple, however, they offer a highly effective way to organize your state and logic. 
+Classes can certainly be misused - for example overuse of inheritance.  If you keep it simple they offer a highly effective way to organize your state and logic. 

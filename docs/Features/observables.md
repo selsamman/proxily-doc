@@ -138,9 +138,38 @@ With Proxily all state mutations are synchronous and never batched.  Instead, th
 
 * A reaction only occurs when the top level call to a method in an observable component completes avoiding incomplete state updates.
 * Since asynchronous methods return a promise in response to the first await, all reactions to state changes cannot be batched. Either make state changes in asynchronous functions part a deeper method call or group them with [**groupUpdate**](../API/observable#groupupdates)
+## Immutable as Needed
+There are times when you may need the equivalent of immutable data.  This is when the recipient of an object expects that the reference to the object will change when any of the properties of the object change.  Examples include:
+* useEffect dependencies
+* useCallback dependencies
+* useMemo dependencies
+* 3rd Components that react to property changes
+* Class-based components
 
+***useAsImmutable*** will provide a reference to an object that will change when the object's properties change.  This is the same behaviour as with immutable state and what React expects in order to detect changes.  
+
+Consider passing an array as a dependency to ***useEffect***.  Wrap the array reference in ***useAsImmutable*** will cause effect run everytime one of the array elements change:
+```typescript
+const news = observable({  
+    topics: ["politics", "tech", "cooking"],
+    results: {}
+});
+
+function MyComponent {
+
+    // topics will change when it's elements change
+    const topics = useAsImmutable(news.topics);  
+    
+    useEffect( () => {
+        axios.get('/getStories?topics=' + topics.join(','))
+             .then((r) => news.results = r.toJSON());
+    }, [topics]);  
+    // Render news.results
+}
+export default observable(MyComponent);
+```
 ## Class Components ##
-If you have class based components you can wrap them in a high order functional component (HOC) that is further wrapped in **observer**.  Proxily provides a handy function [**bindObservables**](../API/observable#bindobservables) that does this for you:
+If you have class based components you can wrap them in a high order functional component (HOC) that passes the properties using ***useAsImmutable***.  Proxily provides a handy function [**bindObservables**](../API/observable#bindobservables) that does this for you:
 ```typescript jsx
 class CounterState { // Your state
     private _value = 0;
