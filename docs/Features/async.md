@@ -3,7 +3,7 @@ title: Async Functions
 sidebar_position: 3
 ---
 ## Promises
-Since actions are just normal member functions they can be asynchronous:
+Since actions are just member functions they can be asynchronous:
 ```typescript
 class CounterState {
   value = 0;
@@ -16,7 +16,7 @@ class CounterState {
 ## Sagas
 When you have more complex asynchronous behavior or situations where promises are inadequate you can use generators. [Redux-Saga](https://redux-saga.js.org/) has a rich tool-kit for organizing asynchronous behaviours using generators. Proxily integrates with Redux-Sagas without having to use Redux as a store.  
 
-While Redux-sagas you "listening" for actions. With Proxily you schedule sagas with [**scheduleTask**](../API/async.md#scheduletask).
+With Redux-sagas you "listen" for actions. With Proxily you schedule sagas with [**scheduleTask**](../API/async.md#scheduletask).
 
 Start with a generator that has a yield for each asynchronous step of the task: 
 ```typescript
@@ -33,7 +33,8 @@ Any parameters needed by the task are passed through as an object.
 
 When you schedule the task, you chose one of the take helpers such as takeEvery, takeLeading, debounce, throttle to indicate how the scheduling should deal with concurrent invocation of the task.  See the [**scheduleTask**](../API/async.md#scheduletask) for more details.
 
-Generator tasks may also be class members:```typescript
+Generator tasks may also be class members:
+```typescript
 class Container {
     *task({interval} : {interval : number}) {
         yield delay(interval);

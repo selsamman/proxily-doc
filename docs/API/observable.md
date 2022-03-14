@@ -82,20 +82,6 @@ memoize (obj : any, propOrProps : string | Array<string>)
 ```
 **memoize** can only be used in functions that are properties of an observable object and cannot be used to make standalone functions memoized.  There are other libraries suitable for standalone memoization.
 
-## bindObservables ##
-```
-bindObservables<P> (ClassBasedComponent : React.ComponentType<P>) : (args : P) => any
-```
-Accepts a React class based component as a parameter and creates a function-based high order component that call **useObservables** and render the class based component.  Conceptually the function looks like this:
-```
-function (props : any) {
-    useObservables();
-    return (
-        <ClassBasedComponent {...props}/>
-    )
-}
-```
-
 ## nonObservable
 
 Sometimes you need for Proxily to leave certain properties alone and not create a proxy for them since they don't directly contain state and may function improperly if a proxy is created for them.

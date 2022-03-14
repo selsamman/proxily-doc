@@ -2,12 +2,9 @@
 sidebar_position: 6
 title: React 18
 ---
-> React 18 is currently in alpha.  Features have changed since the alpha started and may continue to change. A beta release is anticipated in the fall of 2021.
 
 ## New Features
-React 18 brings some new capabilities to improve the UX experience.  Those that are relavent to Proxily include:
-
-* **Concurrent Rendering** Allows React to break up rendering and prioritize it. It can abandon renders when state changes and rendering components off-screen first while continuing to display a previous version of the component on-screen.  This feature is fully realized when used in conjunction with **transitions**, **deferred values** and **suspense** described below.
+React 18 brings some new capabilities to improve the UX experience. Concurrent Rendering allows React to break up rendering and prioritize it. It can abandon renders when state changes and the rendering components off-screen in preparation for a transition while continuing to display a previous version of  components on-screen.  This feature is fully realized when used in conjunction with **transitions**, **deferred values** and **suspense** described below.
 
 * **Transitions** are a way to mark state updates that will trigger a transition.  The transition consists of off-screen rendering of components with the updated state while continuing to render components on-screen with previous state.  The off-screen render results are brought on-screen only when the entire transition is complete including rendering suspended elements (see below). 
 
@@ -17,7 +14,7 @@ React 18 brings some new capabilities to improve the UX experience.  Those that 
 
 ## Proxily Support
 
-The magic of off-screen rendering is possible because React is capable of "branching" state.  In effect multiple versions of the state are kept such that the on-screen version of the component has access to the original values and off-screen version gets the updated values.  
+The magic of off-screen rendering is possible because React is capable of "branching" state.  In effect multiple versions of the state are kept such that the on-screen version of the component has access to the original values and the off-screen version gets the updated values.  
 
 There are two ways to access the older values in the on-screen version of a component:
 
@@ -25,7 +22,7 @@ There are two ways to access the older values in the on-screen version of a comp
 
 * Previous values can be specifically requested for the benefit of the on-screen version of the component by using a new ```getDeferredValue``` function. 
 
-Branching is intended to be used with React's native setState or by passing values through component props or contexts.  Proxily provides mechanisms to achieve this functionality with observable state.
+This state "branching" is intended to be used with React's native setState or by passing values through component props or contexts.  Proxily provides mechanisms to achieve this functionality with observable state.
 
 ## Transitions 
 
@@ -48,7 +45,7 @@ At this point React will render off-screen components that depend on the state c
 
 ### With Observables
 
-To use transitions with **observable** state you need to use a slightly different way of starting your transition
+Transitions with **observable** in Proxily deal with your entire state and allow it to be branched. The way of using it is quite similar, just substituting useObservableTransition for useTransition.
 ```typescript
 import {useObservableTransition} from 'proxily';
 const myState = observable({something: ""});
@@ -61,35 +58,61 @@ someEvent = () =>
   });
 }
 ```
-If you don't need **isPending** use **useObservableStartTransition** to get your **startTransition**. 
+When you update your state within the startTransition you are "branching" your state and Proxily will provide the old state the component currently on the screen and the current state to another copy of the component that React renders off-screen.
+
+If you don't to update the component currently on the screen while the off-screen rendering is progress (e.g. don't need **isPending** and won't be using **getCurrentValue** you may use **useObservableStartTransition** to get your **startTransition**.   
 ```typescript
 import {useObservableStartTransition} from 'proxily';
 const startTransition = useObservableStartTransition();
 ...
 ```
 
-## Deferred Values
+### Keeping the UI Responsive with getCurrentValue
+You don't have to do anything special to take advantage of this advance off-screen rendering unless you need access to the current value of your state.  This might be, for example if you are providing feedback to the user on input they may have provided. 
 
-### With setState
+In case you want to get the current value of the state rather than the stale value that is normally provided during the transition you can access it using ***getCurrentValue***.  
 
-For values set with **useState**, you can simply request the prior version of a value with **getDeferredState**:
 ```
-  const [text, setText] = useState("hello");
-  const previousText = getDeferredState(text);
-  incrementHandler (e) => setText(e.target.value);
+const updatedText = getCurrentValue(state, state => state.text);
 ```
-Note this applies to the on-screen version of the component. 
 
-### With Observables
+***getCurrentValue*** is serves a similar purpose as ***useDeferredValue*** except that:
+* It must be used along with a transition
+* It provides the eventual state rather than the previous state
 
-For observables you need to request the previous value of an observable with **getDeferredObservable** and wrap the code that sets the value in a **setDeferredObservable** callback.
+### Putting it all together
+
 ```
-  const state = {text: "hello"};
-  ...
-  const [{previousText}, setDeferredObservable] = useDeferredObservable(state);
-  incrementHandler (e) => 
-     setDeferredObservable(() => state.text = e.target.value);
-```  
+const state = observable({
+    searchText: ""
+    articles : []
+});
+
+function SearchList () {
+ const [,startTransition] = useObservableTransition();
+ const change(e) => startTransition(() => state.result.text = e.target.value;
+ return (
+     <>
+        <input value={getCurrentValue(state, state => state.searchText)}
+               onChange={change}/>
+        <Articles search={state.searchText}/>       
+     </>
+ )
+}
+export observer(SearchList);
+```
+Here is what will happen:
+* When you update search results as part of the startTransition callback you are letting both React and Proxily know that a transition is beginning
+* Proxily will update your state immediately but keep the original value around until the transition is complete.
+* React will immediately re-render the on-screen component and Proxily will provide the component with the original value of the data because the transition is still in progress.
+* However, input field sees the current value through **getCurrentValue** 
+* The Articles component is passed the old search value and assuming it uses memo it won't re-render at that point.
+* React will render the component again off-screen. Proxily will provide the new value for searchText so Articles will now render but at a lower priority.  
+* The lower priority means that if you type more search criteria into the input the rendering will be cut short once the current article renders and the whole process repeats itself.
+
+Had we not used the transition the screen would not be updated until the articles all rendered.
+
+> Be sure to use **useObservableTransition** rather than **useObservableStartTransition** since you need to re-render the component to show the updated input value while the off-screen rendering takes place.
 
 ## Suspense ##
 
@@ -130,5 +153,3 @@ Proxily allows a suspense stand-in to be displayed while asynchronously fetched 
   someEvent = (e) => 
       startObservableTransition(() => state.profileId = e.target.value);
   ```
-## Experimental
-These features have to be considered experimental until React reaches the beta stage.  At present they have been tested in sample applications with React 18,  but Proxily itself still has all of its internal unit testing using prior version of React until a new testing library is released that supports React 18.
