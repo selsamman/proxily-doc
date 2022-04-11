@@ -88,7 +88,8 @@ This makes classes far more intuitive to consume.
 
 ## Memoization ##
 
-Memoization reduces costly recalculations of computed values based on your state by saving the result and only re-running the calculation when dependent state is changed.  Both getters and functions with arguments are supported:  
+Memoization reduces costly recalculations of computed values based on your state by saving the result and only re-running the calculation when dependent state is changed.  Both getters and functions with arguments are supported
+### Memoize object property functions 
 ```typescript
 const state = {
     counters: [counter1, counter2],
@@ -97,10 +98,16 @@ const state = {
             a.value - b.value);
     }
 };
+```
+You can memoize by property name
+```
 memoize(state, 'sortedCounters'); 
 ```
-You need only annotate an object function with **memoize** or annotate a class method:
-or to memoize a method within a class:
+or using a callback so that you can refactor the property name
+```
+memoize(state, s => s.sortedCounters); 
+```
+### Memoize class member functions
 ```typescript
 class State {
     constructor () {
@@ -112,9 +119,16 @@ class State {
             a.value - b.value);
     }
 };
+```
+You can memoize by property name
+```
 memoize(State, 'sortedCounters');
 ```
-With Typescript decorators ("experimentalDecorators": true in your tsconfig file) you can use **memoize** as a decorator:
+or using a callback so that you can refactor the property name
+```
+memoize(State, s => s.sortedCounters);
+```
+or with Typescript decorators ("experimentalDecorators": true} in your tsconfig file you can use **memoize** as a decorator:
 ```typescript
 class State {
     constructor () {
@@ -168,44 +182,3 @@ function MyComponent {
 }
 export default observable(MyComponent);
 ```
-## Class Components ##
-If you have class based components you can wrap them in a high order functional component (HOC) that passes the properties using ***useAsImmutable***.  Proxily provides a handy function [**bindObservables**](../API/observable#bindobservables) that does this for you:
-```typescript jsx
-class CounterState { // Your state
-    private _value = 0;
-    get value() {
-        return this._value
-    }
-
-    increment() {
-        this._value++
-    }
-}
-
-const state = observable({  // Your Observable state
-    counter: new CounterState()
-});
-
-// Class Based Component
-class CounterClass extends React.Component<{ counter: CounterState }> {
-    render() {
-        const {value, increment} = this.props.counter;
-        return (
-            <div>
-                <span>Count: {value}</span>
-                <button onClick={increment}>Increment</button>
-            </div>
-        );
-    }
-}
-
-// Wrap class-based component to make properties observable
-const Counter = bindObservables(CounterClass);
-
-function App() {
-    return (
-        <Counter counter={state.counter}/>
-    );
-}
-```
-

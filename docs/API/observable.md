@@ -80,6 +80,10 @@ or as a function that accepts a class or object, and it's member function name(s
 ```
 memoize (obj : any, propOrProps : string | Array<string>)
 ```
+or as a function that accepts a class or an object plus a callback function that returns the property or method to be memoized:
+```
+memoize (obj: {new(...args: any[]): C} | C , cb :  (cls : C) => any)) 
+```
 **memoize** can only be used in functions that are properties of an observable object and cannot be used to make standalone functions memoized.  There are other libraries suitable for standalone memoization.
 
 ## nonObservable
